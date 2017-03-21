@@ -1,0 +1,35 @@
+{
+    "project_type": "javascript",
+
+    "debugMode" : 1,
+    "showFPS" : true,
+    "frameRate" : 60,
+    "noCache" : false,
+    "id" : "gameCanvas",
+    "renderMode" : 0,
+    "engineDir":"frameworks/cocos2d-html5",
+
+    "modules" : ["cocos2d"],
+
+    "jsList" : [
+        "src/resource.js",
+
+        "src/global/glbalFunc.js",
+        "src/global/gl_schedule.js",
+
+        "src/const/game_const.js",
+        "src/const/game_enum.js",
+
+        "src/manager/map_manager.js",
+        "src/manager/snake_manager.js",
+        "src/manager/food_manager.js",
+
+        "src/modules/Entity.js",
+        "src/modules/Snake.js",
+        "src/modules/Food.js",
+
+        "src/ui/SnakeNode.js",
+
+        "src/app.js"
+    ]
+}
