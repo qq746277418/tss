@@ -1,0 +1,20 @@
+"jsList" : [
+        "src/resource.js",
+
+        "src/common/gl_schedule.js",
+        "src/common/glbalFunc.js",
+
+        "src/tss/const/tss_const.js",
+        "src/tss/manager/map_manager.js",
+
+        "src/tss/modules/FoodBase.js",
+        "src/tss/modules/FoodCommon.js",
+        "src/tss/modules/SnakeBase.js",
+
+        "src/tss/manager/food_manager.js",
+        "src/tss/manager/snake_manager.js",
+
+        "src/tss/ui/SnakeBody.js",
+
+        "src/app.js"
+    ]
