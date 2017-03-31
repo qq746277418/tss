@@ -38,6 +38,36 @@
 
 */
 
+        var dump = function(object)
+        {
+            //cc.log("{")
+            var tstr = "{"
+            for (var style in object){
+                    var str = null;
+                    if (typeof(object[style]) == "function"){
+                        str = "\n\t" + style + ": " + "function" + ","
+                    }else if (typeof(object[style]) == "object"){
+                        var ctstr = "{"
+                        for (var cstyle in object[style]){
+                            var cstr = null;
+                            if (typeof(object[style][cstyle]) == "function"){
+                                cstr = "\n\t\t" + cstyle + ": " + "function" + ","
+                            }else {
+                                cstr = "\n\t\t" + cstyle + ": " + object[style][cstyle] + ","
+                            }
+                            ctstr = ctstr + cstr;
+                        }
+                        ctstr = ctstr + "\n}";
+                        str = "\n\t" + style + "=" + ctstr;
+                    }else{
+                        str = "\n\t" + style + ": " + object[style] + ","
+                    }
+                    tstr = tstr + str;
+                }
+            tstr = tstr + "\n}";
+            cc.log(tstr);
+        };
+
 
 
 //都当成有contentsize的处理吧
@@ -214,26 +244,6 @@ gl.CopyMemoryTs = function(tdata, began, data, length)
 }
 
 //______________________________UI_________________________
-var func = function(sender, type){
-            var snake = SnakeManager.getInstance().getSnake(self._playerId);
-            
-            switch (type) {
-                case ccui.Widget.TOUCH_BEGAN:
-                    snake.setSpeedScale(2);
-                    break;
-                case ccui.Widget.TOUCH_MOVED:
-                    
-                    break;
-                case ccui.Widget.TOUCH_ENDED:
-                    snake.setSpeedScale(1);
-                    break;
-                case ccui.Widget.TOUCH_CANCELED:
-                    snake.setSpeedScale(1);
-                    break;
-                default:
-                    break;
-            }
-}
 //{normal, pressed, disabled, listener, touch_listener, target, tag}
 gl.createButton = function(params)
 {

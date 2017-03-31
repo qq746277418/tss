@@ -3,6 +3,8 @@ var HelloWorldLayer = cc.Layer.extend({
     _mapLayer:null,
     _schedule: new CSchedule(),
     _touchYaoB: false,
+
+    _snakePlayer: null,
     ctor:function () {
         //////////////////////////////
         // 1. super init first
@@ -10,65 +12,76 @@ var HelloWorldLayer = cc.Layer.extend({
         self = this;
         var size = cc.winSize;
 
-        this._mapLayer = new cc.LayerColor(cc.color(255, 255, 255, 255), MAP_WIDTH, MAP_HEIGHT);
-        this.addChild(this._mapLayer);
-        var snakeLayer = new cc.Layer();
-        this._mapLayer.addChild(snakeLayer, 1);
-        SnakeManager.getInstance().setBodyParent(snakeLayer);
-        this._playerId = SnakeManager.getInstance().createSnake(cc.p(200, 400), cc.p(1,0), 5, SnakeType.PLAYER);
-        for( var i = 0; i < SNAKE_ENEMY_INIT_NUM; i++ ) {
-            var posx = Math.random() * (MAP_WIDTH - 200);
-            SnakeManager.getInstance().createSnake(cc.p(posx + 100, Math.random() * (MAP_HEIGHT - 200 ) + 100), cc.p(1,0), SNAKE_INIT_LENGTH, SnakeType.AI);
-        }
-
-        var foodLayer = new cc.Layer();
-        this._mapLayer.addChild(foodLayer, 0);
-        FoodManager.getInstance().setBodyParent(foodLayer);
-        FoodManager.getInstance().initFoods(300);
-
-        addNodeTouchEventListener(this, this.__nodeTouchEventListener.bind(this));
-        this._schedule.start(0, 0.01, this.__updateListener);
-
-        //
+        //ui
+                //
         var func = function(event){
-            var snake = SnakeManager.getInstance().getSnake(self._playerId);
-            if (event.name == "began"){
-                snake.setSpeedScale(2);
+            if (event.name == "ended"){
+                self._snakePlayer.setSpeedScale(1);
             } else {
-                snake.setSpeedScale(1);
+                self._snakePlayer.setSpeedScale(2);
             }
         }
-        var button = gl.CreateButton({normal: "res/body.png", pressed: "res/body.png", touch_listener: func, target: this});
+        var button = gl.createButton({normal: "res/joystick2.png", pressed: "res/joystick2.png", touch_listener: func, target: this});
         this.addChild(button, 2);
         button.setPosition(cc.p(cc.winSize.width - 50, 50));
+
+        var socreF = new ccui.Text("当前得分: ", "Arial", 26);
+        this.addChild(socreF, 10);
+        socreF.setPosition(cc.p(cc.winSize.width - 140, cc.winSize.height - 50));
+        socreF.setTextColor(cc.color(255, 144, 120));
+
+        this._scoreLabel = new ccui.Text("0", "Arial", 26);
+        this.addChild(this._scoreLabel, 10);
+        this._scoreLabel.setPosition(cc.p(X(socreF) + W(socreF) + 5, cc.winSize.height - 50));
+        this._scoreLabel.setTextColor(cc.color(255, 0, 0));
 
         //摇杆
         this._diZuo = new cc.Sprite("res/joystick1.png");
         this._diZuo.x = 100;
         this._diZuo.y = 100;
-        this.addChild(this._diZuo);
+        this.addChild(this._diZuo, 10);
 
         this._hKuai = new cc.Sprite("res/joystick2.png");
         this._hKuai.x = 100;
         this._hKuai.y = 100;
-        this.addChild(this._hKuai);
-
+        this.addChild(this._hKuai, 10);
         this._hkInitPos = cc.p(100, 100);
-
         this._radius = W(this._diZuo) / 2;
 
+        //child control
+        this._mapLayer = new cc.LayerColor(cc.color(255, 255, 255, 255), MAP_WIDTH, MAP_HEIGHT);
+        this.addChild(this._mapLayer);
+
+        var snakeLayer = new cc.Layer();
+        this._mapLayer.addChild(snakeLayer, 1);
+        tss.snake_manager.setParent(snakeLayer);
+        tss.snake_manager.setGameRoot(this);
+        tss.snake_manager.initAISnakes(20);
+        this._snakePlayer = tss.snake_manager.initPlayerSnake();
+
+        var foodLayer = new cc.Layer();
+        this._mapLayer.addChild(foodLayer, 0);
+        tss.food_manager.initFoods(foodLayer);
+
+        addNodeTouchEventListener(this, this.__nodeTouchEventListener.bind(this));
+        this._schedule.start(0, 0.01, this.__updateListener);
+
         return true;
+    },
+
+    updateScore: function(str)
+    {
+        this._scoreLabel.setString(str);
     },
 
     __nodeTouchEventListener: function(touch, event)
     {
         var SnakeFunc = function(pos){
-            var snake = SnakeManager.getInstance().getSnake(event.node._playerId);
-            if (snake) {
+            if (event.node._snakePlayer) {
                 var tWpos = event.node.convertToNodeSpace(pos);
-                var sWpos = event.node.convertToNodeSpace(snake.getWoldPosition());
+                var sWpos = event.node.convertToNodeSpace(event.node._snakePlayer.getWoldPosition());
                 var dir = gl.pSub(tWpos, cc.p(100, 100));
-                snake.rotateTo(dir);
+                event.node._snakePlayer.rotateTo(dir);
             }
         }
         if (event.name == "began"){
@@ -115,12 +128,10 @@ var HelloWorldLayer = cc.Layer.extend({
 
     __updateListener: function(dt)
     {
-        SnakeManager.getInstance().update(self._schedule.getDelayTime());
-        FoodManager.getInstance().update(self._schedule.getDelayTime());
+        tss.snake_manager.update(self._schedule.getDelayTime())
 
-        var snake = SnakeManager.getInstance().getSnake(self._playerId);
-        if (snake){
-            var pos = self._mapLayer.convertToNodeSpace(snake.getWoldPosition());
+        if (self._snakePlayer){
+            var pos = self._mapLayer.convertToNodeSpace(self._snakePlayer.getWoldPosition());
             var size = cc.winSize;
             var offset = gl.pSub(pos, cc.p(size.width * 0.5, size.height * 0.5));
             var tmpx = MAP_WIDTH - size.width < offset.x ? MAP_WIDTH - size.width : offset.x;
